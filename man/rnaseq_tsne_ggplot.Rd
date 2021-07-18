@@ -6,7 +6,7 @@
 \usage{
 rnaseq_tsne_ggplot(
   rnaseq_tsne_output,
-  sample_metadata_df,
+  sample_metadata_df = NULL,
   color_column = NULL,
   sample_column = "Tumor_Sample_Barcode"
 )

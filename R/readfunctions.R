@@ -146,13 +146,14 @@ rnaseq_tsne <- function(rnaseq_matrix, perplexity = 30){
 #' @export
 #'
 #' @inherit rnaseq_tsne examples
-rnaseq_tsne_ggplot <- function(rnaseq_tsne_output, sample_metadata_df, color_column = NULL, sample_column="Tumor_Sample_Barcode"){
+rnaseq_tsne_ggplot <- function(rnaseq_tsne_output, sample_metadata_df=NULL, color_column = NULL, sample_column="Tumor_Sample_Barcode"){
   assertthat::assert_that(is.list(rnaseq_tsne_output))
-  assertthat::assert_that(is.data.frame(sample_metadata_df))
-  assertthat::assert_that(sample_column %in% colnames(sample_metadata_df), msg = "Could not find sample_column in sample metadata table")
-  assertthat::assert_that(is.null(color_column) || color_column %in% colnames(sample_metadata_df), msg = "Please select a color column thats in the sample metadata table")
 
-  if(!is.null(color_column)){
+  if(!is.null(color_column) && !is.null(sample_metadata_df)){
+    assertthat::assert_that(is.data.frame(sample_metadata_df))
+    assertthat::assert_that(sample_column %in% colnames(sample_metadata_df), msg = paste0("Could not find sample_column '", sample_column ,"' in sample metadata table"))
+    assertthat::assert_that(is.null(color_column) || color_column %in% colnames(sample_metadata_df), msg = "Please select a color column thats in the sample metadata table")
+
     df <- merge(x=rnaseq_tsne_output$df, y = sample_metadata_df[c(sample_column, color_column)], by.x="Tumor_Sample_Barcode", by.y = sample_column)
     geom_point_map <- ggplot2::aes_string(color=color_column)
   }
@@ -165,8 +166,8 @@ rnaseq_tsne_ggplot <- function(rnaseq_tsne_output, sample_metadata_df, color_col
   ggplot2::ggplot(df, ggplot2::aes(x=X, y=Y)) +
     ggplot2::geom_point(mapping=geom_point_map) +
     ggplot2::theme_minimal() +
-    ggplot::xlab("tSNE1") +
-    ggplot::ylab("tSNE2")
+    ggplot2::xlab("tSNE1") +
+    ggplot2::ylab("tSNE2")
 }
 
 
