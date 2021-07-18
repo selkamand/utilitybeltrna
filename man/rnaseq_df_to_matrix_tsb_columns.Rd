@@ -7,7 +7,7 @@
 rnaseq_df_to_matrix_tsb_columns(rnaseq_df)
 }
 \arguments{
-\item{rnaseq_df}{}
+\item{rnaseq_df}{an rnaseq dataframe read by read_rnaseq_file}
 }
 \value{
 a matrix where rows are genes and columns are samples. Each value represents TPM of a gene in a single sample (matrix)
@@ -17,5 +17,5 @@ Converts RNAseq dataframe to a matrix that will be used as the input for most do
 }
 \examples{
 path=system.file("testfiles/blca_rnaseq.tsv", package="utilitybeltrna")
-rnaseq_df_to_matrix(read_rnaseq_data(path))
+rnaseq_df_to_matrix_tsb_columns(read_rnaseq_data(path))
 }

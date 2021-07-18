@@ -76,14 +76,14 @@ assert_rnaseq_df_is_formatted_correctly <- function(rnaseq_df){
 #'
 #' Converts RNAseq dataframe to a matrix that will be used as the input for most downstream
 #'
-#' @param rnaseq_df
+#' @param rnaseq_df an rnaseq dataframe read by read_rnaseq_file
 #'
 #' @return a matrix where rows are genes and columns are samples. Each value represents TPM of a gene in a single sample (matrix)
 #' @export
 #'
 #' @examples
 #' path=system.file("testfiles/blca_rnaseq.tsv", package="utilitybeltrna")
-#' rnaseq_df_to_matrix(read_rnaseq_data(path))
+#' rnaseq_df_to_matrix_tsb_columns(read_rnaseq_data(path))
 rnaseq_df_to_matrix_tsb_columns <- function(rnaseq_df){
   rnaseq_df %>%
     dplyr::select(Hugo_Symbol, TPM, Tumor_Sample_Barcode) %>%
@@ -92,6 +92,17 @@ rnaseq_df_to_matrix_tsb_columns <- function(rnaseq_df){
     as.matrix()
 }
 
+#' Expression Dataframe to Matrix
+#'
+#' @inheritParams rnaseq_df_to_matrix_tsb_columns
+#'
+#' @return matrix where columns are genes and rows are samples
+#' @export
+#'
+#' @examples
+#' path=system.file("testfiles/blca_rnaseq.tsv", package="utilitybeltrna")
+#' rnaseq_df_to_matrix_gene_columns(read_rnaseq_data(path))
+#'
 rnaseq_df_to_matrix_gene_columns <- function(rnaseq_df){
   rnaseq_df %>%
     dplyr::select(Hugo_Symbol, TPM, Tumor_Sample_Barcode) %>%
