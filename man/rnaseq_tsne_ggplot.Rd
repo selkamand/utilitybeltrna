@@ -6,16 +6,17 @@
 \usage{
 rnaseq_tsne_ggplot(
   rnaseq_tsne_output,
-  feature_name_color = "color",
-  feature_values_color = NULL
+  sample_metadata_df,
+  color_column = NULL,
+  sample_column = "Tumor_Sample_Barcode"
 )
 }
 \arguments{
 \item{rnaseq_tsne_output}{output from utilitybeltrna::rnaseq_tsne (list)}
 
-\item{feature_name_color}{name you want to appear in the color legend. Can be any string (no spaces allowed)}
+\item{color_column}{name of sample metadata column to base point color on (string)}
 
-\item{feature_values_color}{a vector with an element for each row of rnaseq_tsne_output$Y used to color output. Obtain using rnaseq_get_metadata_for_plotting}
+\item{sample_column}{name of sample metadata column containing sample ids (string)}
 }
 \value{
 ggplot object
@@ -24,23 +25,19 @@ ggplot object
 rnaseq_tsne_ggplot
 }
 \examples{
+\dontrun{
 # Transpose GDC data imported using GDCRNATools so sampleids are on rows
 rnaseq_mx <- t(data_expression_matrix_gbm_gdc)
 
 # Run tsne
 tsne_out <- rnaseq_tsne(rnaseq_mx)
 
-# Get some metadata of interest to color points by
-vital_status <- rnaseq_get_metadata_for_plotting(
- rnaseq_tsne_matrix = rnaseq_mx,
- metadata_df = data_metadata_gbm_gdc,
- column_containing_sample_ids = "sample",
- feature_of_interest = "vital_status"
-)
-
 # Plot Rtsne results
-    rnaseq_tsne_output = tsne_out,
-    feature_name_color = "Vital_Status",
-    feature_values_color = vital_status
-)
+ rnaseq_tsne_ggplot(
+     rnaseq_tsne_output = tsne_out,
+     sample_metadata_df = data_metadata_gbm_gdc,
+     color_column = "vital_status",
+     sample_column = "sample"
+ )
+ }
 }

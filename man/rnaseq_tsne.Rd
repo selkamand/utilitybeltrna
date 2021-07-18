@@ -18,23 +18,19 @@ tsne results in a list-format. Plot results$Y to see (list)
 Perform dimensionality reduction on a tsne dataset
 }
 \examples{
+\dontrun{
 # Transpose GDC data imported using GDCRNATools so sampleids are on rows
 rnaseq_mx <- t(data_expression_matrix_gbm_gdc)
 
 # Run tsne
 tsne_out <- rnaseq_tsne(rnaseq_mx)
 
-# Get some metadata of interest to color points by
-vital_status <- rnaseq_get_metadata_for_plotting(
- rnaseq_tsne_matrix = rnaseq_mx,
- metadata_df = data_metadata_gbm_gdc,
- column_containing_sample_ids = "sample",
- feature_of_interest = "vital_status"
-)
-
 # Plot Rtsne results
-    rnaseq_tsne_output = tsne_out,
-    feature_name_color = "Vital_Status",
-    feature_values_color = vital_status
-)
+ rnaseq_tsne_ggplot(
+     rnaseq_tsne_output = tsne_out,
+     sample_metadata_df = data_metadata_gbm_gdc,
+     color_column = "vital_status",
+     sample_column = "sample"
+ )
+ }
 }

@@ -111,72 +111,62 @@ rnaseq_df_to_matrix_gene_columns <- function(rnaseq_df){
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' # Transpose GDC data imported using GDCRNATools so sampleids are on rows
 #' rnaseq_mx <- t(data_expression_matrix_gbm_gdc)
 #'
 #' # Run tsne
 #' tsne_out <- rnaseq_tsne(rnaseq_mx)
 #'
-#' # Get some metadata of interest to color points by
-#' vital_status <- rnaseq_get_metadata_for_plotting(
-#'  rnaseq_tsne_matrix = rnaseq_mx,
-#'  metadata_df = data_metadata_gbm_gdc,
-#'  column_containing_sample_ids = "sample",
-#'  feature_of_interest = "vital_status"
-#' )
-#'
 #' # Plot Rtsne results
-#  rnaseq_tsne_ggplot(
-#'     rnaseq_tsne_output = tsne_out,
-#'     feature_name_color = "Vital_Status",
-#'     feature_values_color = vital_status
-#' )
+#'  rnaseq_tsne_ggplot(
+#'      rnaseq_tsne_output = tsne_out,
+#'      sample_metadata_df = data_metadata_gbm_gdc,
+#'      color_column = "vital_status",
+#'      sample_column = "sample"
+#'  )
+#'  }
 rnaseq_tsne <- function(rnaseq_matrix, perplexity = 30){
-  Rtsne::Rtsne(X = rnaseq_matrix, perplexity = perplexity)
-}
-
-
-#' Get metadata for plotting
-#'
-#' @param rnaseq_tsne_matrix the gene expression matrix supplied to rnaseq_tsne
-#' @param metadata_df a dataframe containing clinical metadata. Must contain a 'Tumor_Sample_Barcode' column with unique sampleIDs
-#' @param feature_of_interest the name of the column in metadata_df you want to annotate in a TSNE plot
-#'
-#' @return a vector of 'feature_of_interest' for use with rnaseq_tsne_ggplot
-#' @export
-#' @inherit rnaseq_tsne examples
-rnaseq_get_metadata_for_plotting <- function(rnaseq_tsne_matrix, metadata_df, column_containing_sample_ids = "Tumor_Sample_Barcode", feature_of_interest){
-  indexes = match(
-    rownames(rnaseq_tsne_matrix),
-    metadata_df[[column_containing_sample_ids]]
-  )
-  metadata_df[[feature_of_interest]][indexes]
+  rtsne_out <- Rtsne::Rtsne(X = rnaseq_matrix, perplexity = perplexity)
+  rtsne_out$df <- data.frame(
+    X = rtsne_out$Y[,1],
+    Y = rtsne_out$Y[,2],
+    Tumor_Sample_Barcode = rownames(rnaseq_matrix)
+    )
+  return(rtsne_out)
 }
 
 #' rnaseq_tsne_ggplot
 #'
 #' @param rnaseq_tsne_output output from utilitybeltrna::rnaseq_tsne (list)
-#' @param feature_name_color name you want to appear in the color legend. Can be any string (no spaces allowed)
-#' @param feature_values_color a vector with an element for each row of rnaseq_tsne_output$Y used to color output. Obtain using rnaseq_get_metadata_for_plotting
+#' @param color_column name of sample metadata column to base point color on (string)
+#' @param sample_column name of sample metadata column containing sample ids (string)
 #'
 #' @return ggplot object
 #' @export
 #'
 #' @inherit rnaseq_tsne examples
-rnaseq_tsne_ggplot <- function(rnaseq_tsne_output, feature_name_color="color", feature_values_color=NULL){
-  df=as.data.frame(rnaseq_tsne_output$Y)
-  colnames(df) <- c("X", "Y")
-  df[feature_name_color] <- feature_values_color
+rnaseq_tsne_ggplot <- function(rnaseq_tsne_output, sample_metadata_df, color_column = NULL, sample_column="Tumor_Sample_Barcode"){
+  assertthat::assert_that(is.list(rnaseq_tsne_output))
+  assertthat::assert_that(is.data.frame(sample_metadata_df))
+  assertthat::assert_that(sample_column %in% colnames(sample_metadata_df), msg = "Could not find sample_column in sample metadata table")
+  assertthat::assert_that(is.null(color_column) || color_column %in% colnames(sample_metadata_df), msg = "Please select a color column thats in the sample metadata table")
 
-  if(!is.null(feature_values_color)){
-    geom_point_map <- ggplot2::aes_string(color=feature_name_color)
+  if(!is.null(color_column)){
+    df <- merge(x=rnaseq_tsne_output$df, y = sample_metadata_df[c(sample_column, color_column)], by.x="Tumor_Sample_Barcode", by.y = sample_column)
+    geom_point_map <- ggplot2::aes_string(color=color_column)
   }
-  else
+  else{
+    df <- rnaseq_tsne_output$df
     geom_point_map <- NULL
+  }
+
 
   ggplot2::ggplot(df, ggplot2::aes(x=X, y=Y)) +
     ggplot2::geom_point(mapping=geom_point_map) +
-    ggplot2::theme_minimal()
+    ggplot2::theme_minimal() +
+    ggplot::xlab("tSNE1") +
+    ggplot::ylab("tSNE2")
 }
 
 
